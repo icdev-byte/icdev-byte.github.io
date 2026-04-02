@@ -4,4 +4,6 @@ order: 4
 ---
 
 ## 👋 Hello
-I’m a tech enthusiast fascinated by cybersecurity and system administration. I love diving into both offensive (Red Team) and defensive (Blue Team) sides of security, exploring how systems can be strengthened against real-world threats. My passion is to build, protect, and optimize systems, always learning new ways to stay ahead in the constantly evolving world of technology.
+I am a fresh graduate with a strong interest in backend development and cybersecurity, especially web application security and bug bounty. Currently, I am improving my technical skills through self-learning and hands-on practice using Node.js, Laravel, and MySQL.
+
+This blog serves as a platform to document my learning journey, study notes, and technical explorations in web development and cybersecurity. I believe that consistent learning and practice are essential steps toward becoming a professional in the IT field.
