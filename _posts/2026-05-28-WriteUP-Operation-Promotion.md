@@ -27,7 +27,7 @@ Langkah pertama yang dilakukan adalah proses reconnaissance terhadap target meng
 ```shell
 nmap -sV -sC -p- 10.49.182.70
 ```
-![](../assets/img/posts/3-writeup-operationpromotion/operation1.png)
+![nmap result](operation1.png)
 berdasarkan hasil scanning tersebut terdapat beberapa service dan port yang ditemukan. disini  saya melihat pada http terdapat file **robots.txt** dimana di dalamnya memberitahukan terdapat 1 entri yang dilarang di indeks oleh search engine, yaitu direktori `/admin`.
 ![](../assets/img/posts/3-writeup-operationpromotion/operation2.png)
 setelah menemukan entri `/admin/` dari hasil scan **robots.txt**, langkah selanjutnya  adalah mengakses halaman tersebut melalui web browser di alamat `http://10.49.182.70/admin`.
