@@ -1,8 +1,12 @@
 ---
 title: Instalasi Elastic Stack (Single Node) dengan Security Enabled di Ubuntu Server
 date: 2026-01-13 08:00:00 +0700
-categories: [Blue Team, Linux, SOC]
-tags: [SOC]
+categories:
+  - Blue Team
+  - Linux
+  - SOC
+tags:
+  - SOC
 author: luminis
 published: true
 media_subpath: /assets/img/posts/1-install-elk-stack
@@ -30,7 +34,7 @@ sudo apt-get install default-jre -y
 ```
 java -version
 ```
-![Java Version](01-java%20-version.png)
+![Java Version|684](01-java%20-version.png)
 ## Task 2 - Menambahkan Repository Elasticsearch
 ### Step 1: Install dependency & import GPG Key
 ```
