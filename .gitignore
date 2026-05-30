@@ -28,6 +28,7 @@ assets/js/dist
 
 # private note
 luminis/
+notes/
 
 # Obsidian personal state
 .obsidian/workspace.json
