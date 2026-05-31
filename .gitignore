@@ -16,6 +16,7 @@ node_modules
 package-lock.json
 
 # IDE configurations
+.vscode
 .idea
 .vscode/*
 !.vscode/settings.json
@@ -37,3 +38,4 @@ notes/
 
 scripts
 _site
+
