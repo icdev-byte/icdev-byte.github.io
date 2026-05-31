@@ -8,22 +8,11 @@ This website documents my journey in cybersecurity through hands-on learning, pr
 
 🎯 Areas of Interest
 
-Penetration Testing
-Web Application Security
-Security Monitoring
-Vulnerability Assessment
-Linux Security
-Capture The Flag (CTF)
+Penetration Testing - Web Application Security - Security Monitoring - Vulnerability Assessment - Linux Security - Capture The Flag (CTF)
 
 📚 What You'll Find Here
 
-TryHackMe Write-ups
-CTF Write-ups
-Security Research Notes
-Vulnerability Analysis
-Security Tool Guides
-Networking and Linux Tutorials
-Cybersecurity Learning Resources
+TryHackMe Write-ups - CTF Write-ups - Security Research Notes - Vulnerability Analysis - Security Tool Guides - Networking and Linux Tutorials - Cybersecurity Learning Resources
 
 🛠️ Tools & Technologies
 
